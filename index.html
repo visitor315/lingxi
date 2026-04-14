@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>古风桌面</title>
+    <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", serif;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .phone-frame {
+            width: 360px;
+            height: 760px;
+            background: #1a1a1a;
+            border-radius: 45px;
+            padding: 10px;
+            box-shadow: 
+                0 0 0 2px #2a2a2a,
+                0 30px 80px rgba(0,0,0,0.7),
+                inset 0 0 40px rgba(0,0,0,0.5);
+            position: relative;
+            transform-origin: center;
+            transition: transform 0.2s ease;
+        }
+
+        @media (max-height: 850px) {
+            .phone-frame { transform: scale(0.96); }
+        }
+        @media (max-height: 810px) {
+            .phone-frame { transform: scale(0.92); }
+        }
+        @media (max-height: 770px) {
+            .phone-frame { transform: scale(0.88); }
+        }
+        @media (max-height: 730px) {
+            .phone-frame { transform: scale(0.84); }
+        }
+        @media (max-height: 690px) {
+            .phone-frame { transform: scale(0.80); }
+        }
+        @media (max-height: 650px) {
+            .phone-frame { transform: scale(0.76); }
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #f7f3eb 0%, #ede7dc 100%);
+            border-radius: 38px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ink-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 70%, rgba(212, 196, 176, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 85% 30%, rgba(139, 115, 85, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 60% at 50% 50%, rgba(220, 211, 195, 0.2) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .paper-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .status-bar {
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            padding-top: 12px;
+            color: #3a3229;
+            position: relative;
+            z-index: 100;
+            background: transparent;
+        }
+
+        .time {
+            font-size: 17px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.5px;
+        }
+
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 12px;
+        }
+
+        .signal-bar {
+            width: 3px;
+            background: #3a3229;
+            border-radius: 1px;
+            opacity: 0.25;
+        }
+
+        .signal-bar.active { opacity: 0.9; }
+        .signal-bar:nth-child(1) { height: 4px; }
+        .signal-bar:nth-child(2) { height: 6px; }
+        .signal-bar:nth-child(3) { height: 8px; }
+        .signal-bar:nth-child(4) { height: 10px; }
+
+        .wifi-icon {
+            width: 16px;
+            height: 16px;
+            margin-left: 2px;
+        }
+
+        .battery {
+            width: 24px;
+            height: 12px;
+            border: 1.5px solid rgba(58, 50, 41, 0.8);
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 1px;
+            margin-left: 2px;
+        }
+
+        .battery::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            width: 2px;
+            height: 5px;
+            background: rgba(58, 50, 41, 0.8);
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-level {
+            width: 75%;
+            height: 100%;
+            background: rgba(58, 50, 41, 0.85);
+            border-radius: 1px;
+        }
+
+        .home-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 8px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .date-widget {
+            margin-top: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #4a4339;
+        }
+
+        .time-big {
+            font-size: 52px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            line-height: 1;
+            margin-bottom: 8px;
+            color: #2c241b;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .date-text {
+            font-size: 15px;
+            color: #6b5d4d;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px 12px;
+            padding: 0 8px;
+            margin-bottom: auto;
+        }
+
+        .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .app-item:active {
+            transform: scale(0.88);
+            opacity: 0.8;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 4px 12px rgba(0,0,0,0.08),
+                0 1px 3px rgba(0,0,0,0.05),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .app-icon svg {
+            width: 28px;
+            height: 28px;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+        }
+
+        .app-name {
+            font-size: 12px;
+            color: #4a4339;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+        }
+
+        .dock .app-icon {
+            width: 56px;
+            height: 56px;
+        }
+        .dock .app-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        .app-yunxin { background: linear-gradient(135deg, rgba(124, 179, 66, 0.85) 0%, rgba(85, 139, 47, 0.9) 100%); }
+        .app-yunshu { background: linear-gradient(135deg, rgba(92, 107, 192, 0.85) 0%, rgba(57, 73, 171, 0.9) 100%); }
+        .app-moyun { background: linear-gradient(135deg, rgba(141, 110, 99, 0.85) 0%, rgba(93, 64, 55, 0.9) 100%); }
+        .app-qinse { background: linear-gradient(135deg, rgba(255, 112, 67, 0.85) 0%, rgba(230, 74, 19, 0.9) 100%); }
+        .app-bimo { background: linear-gradient(135deg, rgba(144, 164, 174, 0.85) 0%, rgba(96, 125, 139, 0.9) 100%); }
+        .app-rigui { background: linear-gradient(135deg, rgba(255, 183, 77, 0.85) 0%, rgba(245, 124, 0, 0.9) 100%); }
+        .app-tianxiang { background: linear-gradient(135deg, rgba(79, 195, 247, 0.85) 0%, rgba(2, 136, 209, 0.9) 100%); }
+        .app-luopan { background: linear-gradient(135deg, rgba(174, 213, 129, 0.85) 0%, rgba(124, 179, 66, 0.9) 100%); }
+        .app-xiping { background: linear-gradient(135deg, rgba(120, 120, 120, 0.9) 0%, rgba(70, 70, 70, 0.95) 100%); }
+        
+        /* 新增应用配色 */
+        .app-shanhai { 
+            background: linear-gradient(135deg, rgba(160, 110, 80, 0.85) 0%, rgba(120, 80, 60, 0.9) 100%); 
+        }
+        .app-sinan { 
+            background: linear-gradient(135deg, rgba(120, 144, 156, 0.85) 0%, rgba(84, 110, 122, 0.9) 100%); 
+        }
+
+        .dock {
+            height: 84px;
+            background: rgba(255, 255, 255, 0.45);
+            border-radius: 32px;
+            margin: 0 8px 20px 8px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 8px;
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 
+                0 4px 20px rgba(0,0,0,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+
+        .dock .app-item {
+            transform: scale(1.02);
+        }
+
+        .dock .app-item:active {
+            transform: scale(0.95);
+        }
+
+        .dock .app-name {
+            display: none;
+        }
+
+        .home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 4px;
+            background: rgba(44, 36, 27, 0.25);
+            border-radius: 2px;
+            z-index: 100;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.5s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        .app-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f5f1e8;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .app-container.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .app-status-bar {
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            padding-top: 12px;
+            color: #3a3229;
+            background: #f5f1e8;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .app-status-bar .time {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .app-status-bar .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .app-frame-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #f5f1e8;
+        }
+
+        .app-home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 130px;
+            height: 4px;
+            background: rgba(44, 36, 27, 0.25);
+            border-radius: 2px;
+            z-index: 1001;
+            cursor: pointer;
+        }
+
+        .screen-off {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            border-radius: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 16px;
+            letter-spacing: 4px;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .screen-off.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .screen-off-icon {
+            width: 60px;
+            height: 60px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="screen" id="screen">
+            <div class="ink-bg"></div>
+            <div class="paper-texture"></div>
+            
+            <div class="status-bar">
+                <div class="time" id="clock">23:16</div>
+                <div class="status-icons">
+                    <div class="signal-bars">
+                        <div class="signal-bar active"></div>
+                        <div class="signal-bar active"></div>
+                        <div class="signal-bar active"></div>
+                        <div class="signal-bar active"></div>
+                    </div>
+                    <svg class="wifi-icon" width="16" height="16" viewBox="0 0 24 24" fill="#3a3229">
+                        <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+                    </svg>
+                    <div class="battery">
+                        <div class="battery-level"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-content">
+                <div class="date-widget">
+                    <div class="time-big" id="time-big">23:16</div>
+                    <div class="date-text" id="date-text">4月14日 星期二</div>
+                </div>
+
+                <!-- 主应用网格：扩展为 4×3 布局，容纳 10 个应用 -->
+                <div class="app-grid">
+                    <!-- 第一行 -->
+                    <div class="app-item" onclick="openApp('云信')">
+                        <div class="app-icon app-yunxin">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.82.38 3.55 1.07 5.11L2 22l5.08-1.03C8.54 21.62 10.22 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.59 0-3.11-.41-4.45-1.17l-.32-.18-3.02.61.63-2.94-.2-.32C3.77 14.69 3 13.39 3 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9z"/>
+                                <circle cx="9" cy="12" r="1"/>
+                                <circle cx="15" cy="12" r="1"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">云信</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('墨韵')">
+                        <div class="app-icon app-moyun">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                <circle cx="9" cy="8" r="1.5" opacity="0.6"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">墨韵</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('琴瑟')">
+                        <div class="app-icon app-qinse">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                <circle cx="10" cy="17" r="1" opacity="0.6"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">琴瑟</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('天象')">
+                        <div class="app-icon app-tianxiang">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 9c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">天象</div>
+                    </div>
+                    
+                    <!-- 第二行 -->
+                    <div class="app-item" onclick="openApp('日晷')">
+                        <div class="app-icon app-rigui">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.7-1.2-4.4-2.6V7z"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">日晷</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('笔墨')">
+                        <div class="app-icon app-bimo">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">笔墨</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('罗盘')">
+                        <div class="app-icon app-luopan">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">罗盘</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('云枢')">
+                        <div class="app-icon app-yunshu">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">云枢</div>
+                    </div>
+                    
+                    <!-- 第三行（新增） -->
+                    <div class="app-item" onclick="openApp('山海')">
+                        <div class="app-icon app-shanhai">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="white" stroke-width="1.5" fill="none"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="white" opacity="0.9"/>
+                                <path d="M7 12l2.5-4 2.5 3 2.5-3 2.5 4" stroke="rgba(160,110,80,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                <path d="M7 15c1-1 2-1 3 0s2 1 3 0" stroke="rgba(160,110,80,0.7)" stroke-width="1" stroke-linecap="round" fill="none"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">山海</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('司南')">
+                        <div class="app-icon app-sinan">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <circle cx="12" cy="12" r="8" stroke="white" stroke-width="1.5" fill="none" opacity="0.6"/>
+                                <path d="M12 5c-1 0-2 1-2 2v8c0 1 1 2 2 2s2-1 2-2V7c0-1-1-2-2-2z" fill="white"/>
+                                <circle cx="12" cy="14" r="1.5" fill="rgba(120,144,156,0.9)"/>
+                                <path d="M12 3v1M12 20v1M3 12h1M20 12h1" stroke="white" stroke-width="1" opacity="0.8"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">司南</div>
+                    </div>
+                    <!-- 占位保持网格对齐（可选） -->
+                    <div class="app-item" style="visibility: hidden;">
+                        <div class="app-icon"></div>
+                        <div class="app-name"></div>
+                    </div>
+                    <div class="app-item" style="visibility: hidden;">
+                        <div class="app-icon"></div>
+                        <div class="app-name"></div>
+                    </div>
+                </div>
+
+                <!-- Dock栏：司南替换云枢 -->
+                <div class="dock">
+                    <div class="app-item" onclick="openApp('云信')">
+                        <div class="app-icon app-yunxin">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.82.38 3.55 1.07 5.11L2 22l5.08-1.03C8.54 21.62 10.22 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.59 0-3.11-.41-4.45-1.17l-.32-.18-3.02.61.63-2.94-.2-.32C3.77 14.69 3 13.39 3 12c0-4.97 4.03-9 9-9s9 4.03 9 9-4.03 9-9 9z"/>
+                                <circle cx="9" cy="12" r="1"/>
+                                <circle cx="15" cy="12" r="1"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">云信</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('墨韵')">
+                        <div class="app-icon app-moyun">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                <circle cx="9" cy="8" r="1.5" opacity="0.6"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">墨韵</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('司南')">
+                        <div class="app-icon app-sinan">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <circle cx="12" cy="12" r="8" stroke="white" stroke-width="1.5" fill="none" opacity="0.6"/>
+                                <path d="M12 5c-1 0-2 1-2 2v8c0 1 1 2 2 2s2-1 2-2V7c0-1-1-2-2-2z" fill="white"/>
+                                <circle cx="12" cy="14" r="1.5" fill="rgba(120,144,156,0.9)"/>
+                                <path d="M12 3v1M12 20v1M3 12h1M20 12h1" stroke="white" stroke-width="1" opacity="0.8"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">司南</div>
+                    </div>
+                    <div class="app-item" onclick="openApp('息屏')">
+                        <div class="app-icon app-xiping">
+                            <svg viewBox="0 0 24 24" fill="white">
+                                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+                            </svg>
+                        </div>
+                        <div class="app-name">息屏</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-indicator"></div>
+
+            <!-- 应用容器（已预留山海与司南的 frame 路径） -->
+            <div class="app-container" id="appContainer">
+                <div class="app-status-bar">
+                    <div class="time" id="appClock">23:16</div>
+                    <div class="status-icons">
+                        <div class="signal-bars">
+                            <div class="signal-bar active"></div>
+                            <div class="signal-bar active"></div>
+                            <div class="signal-bar active"></div>
+                            <div class="signal-bar active"></div>
+                        </div>
+                        <svg class="wifi-icon" width="16" height="16" viewBox="0 0 24 24" fill="#3a3229">
+                            <path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/>
+                        </svg>
+                        <div class="battery">
+                            <div class="battery-level"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-frame-container" id="frameContainer">
+                    <iframe class="app-frame" id="appFrame" src=""></iframe>
+                </div>
+                <div class="app-home-indicator" id="appIndicator"></div>
+            </div>
+
+            <div class="screen-off" id="screenOff" onclick="wakeScreen()">
+                <svg class="screen-off-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+                </svg>
+                <div>轻触唤醒</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 新增山海与司南的应用路径预留
+        const appUrls = {
+            '云信': 'apps/yunxin.html',
+            '云枢': 'apps/yunshu.html',
+            '墨韵': 'apps/moyun.html',
+            '琴瑟': 'apps/qinse.html',
+            '天象': 'apps/tianxiang.html',
+            '日晷': 'apps/rigui.html',
+            '笔墨': 'apps/bimo.html',
+            '罗盘': 'apps/luopan.html',
+            '山海': 'apps/shanhai.html',   // 世界书应用预留
+            '司南': 'apps/sinan.html',     // 设置应用预留
+            '息屏': null
+        };
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = hours + ':' + minutes;
+            
+            document.getElementById('clock').textContent = timeStr;
+            document.getElementById('appClock').textContent = timeStr;
+            document.getElementById('time-big').textContent = timeStr;
+            
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            const weekday = weekdays[now.getDay()];
+            document.getElementById('date-text').textContent = `${month}月${date}日 星期${weekday}`;
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.querySelectorAll('.app-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.style.visibility === 'hidden') return;
+                const rect = this.getBoundingClientRect();
+                const icon = this.querySelector('.app-icon');
+                const ripple = document.createElement('div');
+                ripple.className = 'ripple';
+                const size = 45;
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+                ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+                icon.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 500);
+            });
+        });
+
+        function openApp(name) {
+            if (name === '息屏') {
+                document.getElementById('screenOff').classList.add('active');
+                return;
+            }
+            const url = appUrls[name];
+            if (url) {
+                document.getElementById('appFrame').src = url;
+                document.getElementById('appContainer').classList.add('active');
+            }
+        }
+
+        function closeApp() {
+            document.getElementById('appContainer').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('appFrame').src = '';
+            }, 300);
+        }
+
+        function wakeScreen() {
+            document.getElementById('screenOff').classList.remove('active');
+        }
+
+        let touchStartY = 0, touchEndY = 0;
+        const gestureThreshold = 60;
+        const appContainer = document.getElementById('appContainer');
+        const appIndicator = document.getElementById('appIndicator');
+        
+        appContainer.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+        appContainer.addEventListener('touchend', function(e) {
+            touchEndY = e.changedTouches[0].clientY;
+            handleSwipe();
+        }, {passive: true});
+
+        let mouseDown = false;
+        appContainer.addEventListener('mousedown', function(e) {
+            mouseDown = true;
+            touchStartY = e.clientY;
+        });
+        appContainer.addEventListener('mouseup', function(e) {
+            if (!mouseDown) return;
+            mouseDown = false;
+            touchEndY = e.clientY;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeDistance = touchStartY - touchEndY;
+            const screenHeight = window.innerHeight;
+            if (touchStartY > screenHeight - 120 && swipeDistance > gestureThreshold) {
+                closeApp();
+            }
+        }
+
+        appIndicator.addEventListener('click', closeApp);
+        document.getElementById('appFrame').addEventListener('error', function() {
+            this.srcdoc = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:#6b5d4d;font-family:LXGW WenKai Screen;">应用加载失败</div>';
+        });
+    </script>
+</body>
+</html>

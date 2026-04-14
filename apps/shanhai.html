@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>山海 - 世界书</title>
+    <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", serif;
+            background: linear-gradient(180deg, #f7f3eb 0%, #ede7dc 100%);
+            color: #3a3229;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .paper-texture {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 顶部栏 */
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(247, 243, 235, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(139, 115, 85, 0.15);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c241b;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: #8b7355;
+            font-weight: 400;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(139, 115, 85, 0.08);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b5d4d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(139, 115, 85, 0.15);
+        }
+
+        .icon-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 内容区 */
+        .container {
+            position: relative;
+            z-index: 2;
+            padding: 16px;
+            max-width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 切换按钮组 */
+        .scope-switcher {
+            display: flex;
+            background: rgba(139, 115, 85, 0.08);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(139, 115, 85, 0.15);
+        }
+
+        .scope-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            color: #6b5d4d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .scope-btn.active {
+            background: rgba(255, 255, 255, 0.6);
+            color: #2c241b;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            font-family: inherit;
+            font-size: 14px;
+            color: #3a3229;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(139, 115, 85, 0.4);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #8b7355;
+        }
+
+        /* 批量操作栏 */
+        .batch-bar {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(92, 107, 192, 0.08);
+            border: 1px solid rgba(92, 107, 192, 0.2);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .batch-bar.active {
+            display: flex;
+        }
+
+        .batch-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .batch-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .batch-btn-select {
+            background: rgba(139, 115, 85, 0.15);
+            color: #5a4d3d;
+        }
+
+        .batch-btn-move {
+            background: rgba(92, 107, 192, 0.15);
+            color: #5c6bc0;
+        }
+
+        .batch-btn-delete {
+            background: rgba(211, 47, 47, 0.1);
+            color: #c62828;
+        }
+
+        /* 条目卡片 */
+        .entry-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-bottom: 20px;
+        }
+
+        .entry-item {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(139, 115, 85, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .entry-item:hover {
+            background: rgba(255, 255, 255, 0.6);
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .entry-item.selected {
+            border-color: rgba(92, 107, 192, 0.4);
+            background: rgba(92, 107, 192, 0.05);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .entry-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+
+        .entry-checkbox {
+            display: none;
+            width: 18px;
+            height: 18px;
+            margin-right: 4px;
+            cursor: pointer;
+        }
+
+        .batch-mode .entry-checkbox {
+            display: block;
+        }
+
+        .entry-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c241b;
+        }
+
+        .entry-trigger {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(139, 115, 85, 0.1);
+            color: #6b5d4d;
+            white-space: nowrap;
+        }
+
+        .entry-trigger.keyword {
+            background: rgba(255, 183, 77, 0.15);
+            color: #f57c00;
+        }
+
+        .entry-keywords {
+            font-size: 11px;
+            color: #8b7355;
+            margin-left: 4px;
+        }
+
+        .entry-content {
+            font-size: 13px;
+            color: #5a4d3d;
+            line-height: 1.5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin-bottom: 8px;
+        }
+
+        .entry-scope-tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(139, 115, 85, 0.08);
+            color: #8b7355;
+        }
+
+        .entry-actions {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .entry-item:hover .entry-actions {
+            opacity: 1;
+        }
+
+        .entry-action-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #6b5d4d;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 添加按钮 */
+        .fab {
+            position: fixed;
+            right: 20px;
+            bottom: 100px;
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(139, 115, 85, 0.9) 0%, rgba(107, 93, 77, 0.95) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(139, 115, 85, 0.4);
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .fab:hover {
+            transform: scale(1.05);
+        }
+
+        .fab svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* 提示词页面 */
+        .module-card {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(139, 115, 85, 0.15);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(139, 115, 85, 0.05);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .module-header:hover {
+            background: rgba(139, 115, 85, 0.1);
+        }
+
+        .module-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a4339;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .module-number {
+            font-size: 12px;
+            color: #8b7355;
+            font-weight: normal;
+        }
+
+        .module-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .reset-btn {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: rgba(139, 115, 85, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #6b5d4d;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: rgba(139, 115, 85, 0.2);
+        }
+
+        .reset-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .module-toggle {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .module-toggle.expanded {
+            transform: rotate(180deg);
+        }
+
+        .module-body {
+            display: none;
+            padding: 12px 16px;
+            border-top: 1px solid rgba(139, 115, 85, 0.1);
+        }
+
+        .module-body.expanded {
+            display: block;
+        }
+
+        .module-textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #3a3229;
+            background: rgba(255, 255, 255, 0.6);
+            resize: vertical;
+            outline: none;
+        }
+
+        .module-textarea:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .custom-module-header-input {
+            flex: 1;
+            border: none;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.3);
+            background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a4339;
+            outline: none;
+            padding: 2px 4px;
+            margin-right: 8px;
+        }
+
+        .add-module-btn {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed rgba(139, 115, 85, 0.3);
+            border-radius: 12px;
+            background: transparent;
+            color: #6b5d4d;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-module-btn:hover {
+            border-color: rgba(139, 115, 85, 0.5);
+            background: rgba(139, 115, 85, 0.05);
+        }
+
+        /* 设置页面 */
+        .setting-section {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(139, 115, 85, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        .setting-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #4a4339;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-title::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(180deg, #8b7355 0%, #6b5d4d 100%);
+            border-radius: 2px;
+        }
+
+        .preview-wrapper {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .preview-wrapper.expanded {
+            display: block;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+            margin-bottom: 12px;
+        }
+
+        .preview-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a4339;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-arrow {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .preview-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .preview-box {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: "LXGW WenKai Screen", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #3a3229;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .copy-btn {
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(92, 107, 192, 0.9) 0%, rgba(57, 73, 171, 0.95) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(92, 107, 192, 0.3);
+        }
+
+        .tester-container {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .tester-box {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .tester-input {
+            flex: 1;
+            min-height: 40px;
+            padding: 10px 12px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            font-family: inherit;
+            font-size: 14px;
+            color: #3a3229;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .tester-input:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .tester-btn {
+            padding: 0 16px;
+            height: 40px;
+            background: rgba(139, 115, 85, 0.9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .tester-btn:hover {
+            background: rgba(139, 115, 85, 1);
+        }
+
+        .match-mode {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #5a4d3d;
+        }
+
+        .match-mode label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .match-mode input[type="radio"] {
+            margin: 0;
+        }
+
+        .variable-item {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            flex-direction: row;
+        }
+
+        .var-input {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 10px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            font-family: inherit;
+            font-size: 13px;
+            color: #3a3229;
+            outline: none;
+            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .var-input:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .var-delete {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(211, 47, 47, 0.1);
+            border-radius: 6px;
+            color: #c62828;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .var-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            font-family: inherit;
+            font-size: 13px;
+            color: #3a3229;
+            outline: none;
+        }
+
+        .var-input:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .var-delete {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(211, 47, 47, 0.1);
+            border-radius: 6px;
+            color: #c62828;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .var-delete:hover {
+            background: rgba(211, 47, 47, 0.2);
+        }
+
+        .add-var-btn {
+            width: 100%;
+            padding: 8px;
+            border: 1px dashed rgba(139, 115, 85, 0.3);
+            border-radius: 6px;
+            background: transparent;
+            color: #6b5d4d;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-var-btn:hover {
+            border-color: rgba(139, 115, 85, 0.5);
+            background: rgba(139, 115, 85, 0.05);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(139, 115, 85, 0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, rgba(139, 115, 85, 0.9) 0%, rgba(107, 93, 77, 0.95) 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .slider-value {
+            width: 50px;
+            text-align: center;
+            font-size: 14px;
+            color: #4a4339;
+            font-weight: 600;
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .data-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 10px;
+            border: 1px solid rgba(139, 115, 85, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            color: #5a4d3d;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .data-btn:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(139, 115, 85, 0.5);
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(139, 115, 85, 0.15);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 16px;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            cursor: pointer;
+            color: #8b7355;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: #2c241b;
+        }
+
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item.active .nav-icon {
+            transform: translateY(-2px);
+        }
+
+        .nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .nav-indicator {
+            position: absolute;
+            bottom: 8px;
+            width: 20px;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(139, 115, 85, 0.8) 0%, rgba(107, 93, 77, 0.8) 100%);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 200;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, #faf8f3 0%, #f5f1e8 100%);
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 201;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.15);
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #2c241b;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(139, 115, 85, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #6b5d4d;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: #5a4d3d;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            font-family: inherit;
+            font-size: 14px;
+            color: #3a3229;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #3a3229;
+            resize: vertical;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-textarea:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .radio-item {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #5a4d3d;
+        }
+
+        .radio-item.active {
+            border-color: rgba(139, 115, 85, 0.5);
+            background: rgba(139, 115, 85, 0.1);
+            color: #2c241b;
+        }
+
+        .match-mode-select {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .match-option {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            color: #5a4d3d;
+            transition: all 0.3s ease;
+        }
+
+        .match-option.active {
+            border-color: rgba(139, 115, 85, 0.5);
+            background: rgba(139, 115, 85, 0.1);
+            color: #2c241b;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(139, 115, 85, 0.9) 0%, rgba(107, 93, 77, 0.95) 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.6);
+            color: #6b5d4d;
+            border: 1px solid rgba(139, 115, 85, 0.3);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b7355;
+            opacity: 0.6;
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 修复设置页布局问题 */
+        #tab-settings {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #tab-settings .setting-section {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    
+        /* 触发测试修复 */
+        .tester-box {
+            flex-wrap: nowrap !important;
+        }
+        .tester-input {
+            min-width: 0 !important;
+            height: 44px !important;
+        }
+        .tester-btn {
+            flex-shrink: 0 !important;
+            height: 44px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+    
+        /* Bug修复: 设置页严格宽度控制防止错位 */
+        #tab-settings {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        #tab-settings .setting-section {
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        #tab-settings .container {
+            padding: 16px !important;
+        }
+
+        /* 自定义弹窗样式 */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .custom-modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 85%;
+            max-width: 320px;
+            background: linear-gradient(180deg, #faf8f3 0%, #f5f1e8 100%);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1001;
+        }
+
+        .custom-modal.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .custom-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .custom-modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #2c241b;
+        }
+
+        .custom-modal-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(139, 115, 85, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #6b5d4d;
+        }
+
+        .custom-modal-body {
+            font-size: 15px;
+            color: #4a4339;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        .custom-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .custom-modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .custom-modal-btn-primary {
+            background: linear-gradient(135deg, rgba(139, 115, 85, 0.9) 0%, rgba(107, 93, 77, 0.95) 100%);
+            color: white;
+        }
+
+        .custom-modal-btn-secondary {
+            background: rgba(139, 115, 85, 0.1);
+            color: #6b5d4d;
+        }
+
+        .custom-modal-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="paper-texture"></div>
+
+    <!-- 顶部栏 -->
+    <div class="header">
+        <div class="header-title">
+            山海
+            <span class="header-subtitle">世界书</span>
+        </div>
+        
+    </div>
+
+    <!-- 内容区 -->
+    <div class="container">
+        <!-- 世界书标签 -->
+        <div class="tab-content active" id="tab-worldbook">
+            <!-- 批量操作栏 -->
+            <div class="batch-bar" id="batchBar">
+                <span id="selectedCount">已选 0 项</span>
+                <div class="batch-actions">
+                    <button class="batch-btn batch-btn-select" onclick="batchToggle(true)">全选</button>
+                    <button class="batch-btn batch-btn-move" onclick="batchMove()">移动</button>
+                    <button class="batch-btn batch-btn-delete" onclick="batchDelete()">删除</button>
+                </div>
+            </div>
+
+            <!-- 范围切换 -->
+            <div class="scope-switcher">
+                <button class="scope-btn active" data-scope="global" onclick="switchScope('global')">全局</button>
+                <button class="scope-btn" data-scope="local" onclick="switchScope('local')">局部</button>
+                <button class="scope-btn" data-scope="character" onclick="switchScope('character')">角色</button>
+            </div>
+
+            <!-- 搜索 -->
+            <div class="search-bar">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="search-input" placeholder="搜索标题、内容、关键词..." id="searchInput">
+            </div>
+
+            <!-- 条目列表 -->
+            <div class="entry-list" id="entryList">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 提示词标签 -->
+        <div class="tab-content" id="tab-prompt">
+            <div class="module-card">
+                <div class="module-header" onclick="toggleModule(this)">
+                    <div class="module-title">
+                        基础设定
+                        
+                    </div>
+                    <div class="module-actions">
+                        <button class="reset-btn" onclick="event.stopPropagation();resetModule('module1')" title="恢复默认">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12"></path>
+                            </svg>
+                        </button>
+                        <svg class="module-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="module-body">
+                    <textarea class="module-textarea" id="module1" placeholder="定义AI的基础角色..."></textarea>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-header" onclick="toggleModule(this)">
+                    <div class="module-title">
+                        回复格式
+                        
+                    </div>
+                    <div class="module-actions">
+                        <button class="reset-btn" onclick="event.stopPropagation();resetModule('module2')" title="恢复默认">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12"></path>
+                            </svg>
+                        </button>
+                        <svg class="module-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="module-body">
+                    <textarea class="module-textarea" id="module2" placeholder="定义JSON格式规范..."></textarea>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-header" onclick="toggleModule(this)">
+                    <div class="module-title">
+                        行为准则
+                        
+                    </div>
+                    <div class="module-actions">
+                        <button class="reset-btn" onclick="event.stopPropagation();resetModule('module3')" title="恢复默认">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12"></path>
+                            </svg>
+                        </button>
+                        <svg class="module-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="module-body">
+                    <textarea class="module-textarea" id="module3" placeholder="定义角色情感表达规则..."></textarea>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-header" onclick="toggleModule(this)">
+                    <div class="module-title">
+                        系统通知
+                        
+                    </div>
+                    <div class="module-actions">
+                        <button class="reset-btn" onclick="event.stopPropagation();resetModule('module4')" title="恢复默认">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12"></path>
+                            </svg>
+                        </button>
+                        <svg class="module-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="module-body">
+                    <textarea class="module-textarea" id="module4" placeholder="定义系统通知模板..."></textarea>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="module-header" onclick="toggleModule(this)">
+                    <div class="module-title">
+                        时间感知
+                        
+                    </div>
+                    <div class="module-actions">
+                        <button class="reset-btn" onclick="event.stopPropagation();resetModule('module5')" title="恢复默认">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 12"></path>
+                            </svg>
+                        </button>
+                        <svg class="module-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="module-body">
+                    <textarea class="module-textarea" id="module5" placeholder="定义时间处理规则..."></textarea>
+                </div>
+            </div>
+
+            <!-- 自定义模块容器 -->
+            <div id="customModulesContainer"></div>
+
+            <button class="add-module-btn" onclick="addCustomModule()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                添加自定义模块
+            </button>
+        </div>
+
+        <!-- 设置标签 -->
+        <div class="tab-content" id="tab-settings">
+            <!-- 预览（可折叠） -->
+            <div class="setting-section">
+                <div class="setting-title">提示词预览</div>
+                <div class="preview-header" onclick="togglePreview()">
+                    <div class="preview-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        点击查看完整提示词
+                    </div>
+                    <svg class="preview-arrow" id="previewArrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="preview-wrapper" id="previewWrapper">
+                    <div class="preview-box" id="previewBox">点击生成预览...</div>
+                    <button class="copy-btn" onclick="copyPreview()">复制完整提示词</button>
+                </div>
+            </div>
+
+            <!-- 触发测试 -->
+            <div class="setting-section">
+                <div class="setting-title">触发测试</div>
+                <div class="match-mode">
+                    
+                    <label>
+                        <input type="radio" name="matchMode" value="any" checked onchange="updateMatchMode(this.value)">
+                        任意匹配（OR）
+                    </label>
+                    <label>
+                        <input type="radio" name="matchMode" value="all" onchange="updateMatchMode(this.value)">
+                        全部匹配（AND）
+                    </label>
+                </div>
+                <div class="tester-container">
+                    <div class="tester-box">
+                        <input type="text" class="tester-input" placeholder="输入模拟用户消息..." id="testInput">
+                        <button class="tester-btn" onclick="testTrigger()">测试</button>
+                    </div>
+                </div>
+                <div id="testResult" style="font-size: 13px; color: #5a4d3d; line-height: 1.6;"></div>
+            </div>
+
+            <!-- 变量 -->
+            <div class="setting-section">
+                <div class="setting-title">变量设置</div>
+                <div id="variablesList"></div>
+                <button class="add-var-btn" onclick="addVariable()">+ 添加变量</button>
+            </div>
+
+            <!-- 最大数量 -->
+            <div class="setting-section">
+                <div class="setting-title">最大世界观条目数</div>
+                <div class="slider-group">
+                    <input type="range" class="slider" min="1" max="50" value="10" id="maxEntriesSlider">
+                    <span class="slider-value" id="maxEntriesValue">10</span>
+                </div>
+                <div style="font-size: 12px; color: #8b7355; margin-top: 8px;">
+                    限制单次请求最多注入的世界书条目数量
+                </div>
+            </div>
+
+            <!-- 数据管理 -->
+            <div class="setting-section">
+                <div class="setting-title">数据管理</div>
+                <div class="data-actions">
+                    <button class="data-btn" onclick="exportData()">导出配置</button>
+                    <button class="data-btn" onclick="importData()">导入配置</button>
+                    <button class="data-btn" onclick="resetAll()" style="color: #c62828; border-color: rgba(211, 47, 47, 0.3);">重置所有</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加按钮 -->
+    <button class="fab" onclick="openAddModal()" id="fabBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('worldbook')" style="position: relative;">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span class="nav-text">世界书</span>
+            <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-item" onclick="switchTab('prompt')" style="position: relative;">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                <path d="M2 2l7.586 7.586"></path>
+                <circle cx="11" cy="11" r="2"></circle>
+            </svg>
+            <span class="nav-text">规则</span>
+            <div class="nav-indicator"></div>
+        </div>
+        <div class="nav-item" onclick="switchTab('settings')" style="position: relative;">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span class="nav-text">设置</span>
+            <div class="nav-indicator"></div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑弹窗 -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <div class="modal" id="entryModal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">添加条目</div>
+            <button class="modal-close" onclick="closeModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">标题</label>
+            <input type="text" class="form-input" id="entryTitle" placeholder="如：青云门背景">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">内容</label>
+            <textarea class="form-textarea" id="entryContent" placeholder="世界书具体内容..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">触发方式</label>
+            <div class="radio-group">
+                <div class="radio-item active" data-trigger="global" onclick="selectTrigger('global')">全局使用</div>
+                <div class="radio-item" data-trigger="keyword" onclick="selectTrigger('keyword')">关键词触发</div>
+            </div>
+        </div>
+
+        <div class="form-group" id="keywordGroup" style="display: none;">
+            <label class="form-label">触发关键词（用英文逗号,分隔）</label>
+            <input type="text" class="form-input" id="entryKeywords" placeholder="如：青云门,门派,宗门">
+            <div class="match-mode-select">
+                <div class="match-option active" data-match="any" onclick="selectMatchMode('any')">任意匹配</div>
+                <div class="match-option" data-match="all" onclick="selectMatchMode('all')">全部匹配</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">所属范围</label>
+            <div class="radio-group">
+                <div class="radio-item" data-scope="global" onclick="selectScope('global')">全局</div>
+                <div class="radio-item" data-scope="local" onclick="selectScope('local')">局部</div>
+                <div class="radio-item" data-scope="character" onclick="selectScope('character')">角色</div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveEntry()">保存</button>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;" accept=".json">
+
+    <script>
+        // 数据存储
+        let entries = JSON.parse(localStorage.getItem('shanhai_entries') || '[]');
+        // 清理：过滤掉无效数据（确保是有效的世界书条目）
+        entries = entries.filter(e => {
+            // 必须是有效对象，有scope和title，且title不能是模块ID（module1-5）
+            const isValid = e && typeof e === 'object' && e.scope && e.title;
+            const isNotModule = e.title && !/^module[1-5]$/.test(e.title);
+            return isValid && isNotModule;
+        });
+        let currentScope = 'global';
+        let editingId = null;
+        let batchMode = false;
+        let selectedIds = new Set();
+        let customModules = JSON.parse(localStorage.getItem('shanhai_custom_modules') || '[]');
+        let currentMatchMode = 'any'; // any 或 all
+        let entryMatchMode = 'any'; // 当前编辑条目的匹配模式
+
+        // 默认提示词
+        const defaultPrompts = {
+            module1: '你是一位沉浸式角色扮演助手。根据角色设定，以角色第一人称用中文回复。',
+            module2: `【回复格式说明】
+返回JSON数组。
+- 普通：{"msg":"25字内文字信息"}
+- 发红包：{"type":"redpacket","amount":"金额","note":"15字内备注"}
+- 收取红包：{"type":"rp_receive"}
+- 退回红包：{"type":"rp_refund"}
+- 语音：{"type":"voice","content":"25字内内容","dur":"5s"}
+- 图片：{"type":"image","desc":"100字内文字描述图片内容"}
+- 点外卖：{"type":"takeout","name":"物品名","amount":"金额"}
+
+【强制格式】
+你的输出必须是且仅是一个JSON数组，以[开头，以]结尾。
+示例：[{"msg":"回复内容"},{"msg":"另一条内容"}]
+绝对不允许输出JSON之外的任何文字。`,
+            module3: '【角色行为准则】\n角色应自然、真实地表达情感。',
+            module4: '【系统通知】\n-{momName} 发了一条朋友圈动态：{content}\n-{char} 刚发了朋友圈：{content}\n-朋友圈"{title}" 新增评论：{comments}',
+            module5: '【时间感知】\n请注意每条消息末尾的回复时间，体会现实时间的流逝与间隔，并在回复的情境和语气中合理地体现出来。\'回复时间\'为系统后端自动附加,**在回复时禁止输出回复时间**。'
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderEntries();
+            loadPrompts();
+            loadCustomModules();
+            setupEventListeners();
+            
+            // 加载保存的最大条目数
+            const savedMax = localStorage.getItem('shanhai_max_entries');
+            if (savedMax) {
+                document.getElementById('maxEntriesSlider').value = savedMax;
+                document.getElementById('maxEntriesValue').textContent = savedMax;
+            }
+        });
+
+        function setupEventListeners() {
+            // 搜索
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                renderEntries(e.target.value);
+            });
+
+            // 最大条目数滑块
+            document.getElementById('maxEntriesSlider').addEventListener('input', (e) => {
+                document.getElementById('maxEntriesValue').textContent = e.target.value;
+                localStorage.setItem('shanhai_max_entries', e.target.value);
+            });
+
+            // 文件导入
+            document.getElementById('fileInput').addEventListener('change', handleFileImport);
+        }
+
+        // 切换底部标签
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // 只在世界书页显示FAB
+            document.getElementById('fabBtn').style.display = tab === 'worldbook' ? 'flex' : 'none';
+        }
+
+        // 切换Scope（全局/局部/角色）
+        function switchScope(scope) {
+            currentScope = scope;
+            document.querySelectorAll('.scope-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.scope === scope);
+            });
+            renderEntries();
+        }
+
+        // 渲染条目列表
+        function renderEntries(searchTerm = '') {
+            const list = document.getElementById('entryList');
+            const filtered = entries.filter(e => {
+                // 数据验证：确保是有效的世界书条目（有scope和title字段，且不是模块ID）
+                if (!e || typeof e !== 'object' || !e.scope || !e.title || /^module[1-5]$/.test(e.title)) return false;
+                const matchesScope = e.scope === currentScope;
+                const matchesSearch = !searchTerm || 
+                    (e.title && e.title.includes(searchTerm)) || 
+                    (e.content && e.content.includes(searchTerm)) || 
+                    (e.keywords && Array.isArray(e.keywords) && e.keywords.some(k => k.includes(searchTerm)));
+                return matchesScope && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                        </svg>
+                        <div>暂无${currentScope === 'global' ? '全局' : currentScope === 'local' ? '局部' : '角色'}世界书条目</div>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filtered.map(entry => `
+                <div class="entry-item ${selectedIds.has(entry.id) ? 'selected' : ''}" data-id="${entry.id}">
+                    <div class="entry-header">
+                        <div class="entry-title-row">
+                            <input type="checkbox" class="entry-checkbox" 
+                                ${selectedIds.has(entry.id) ? 'checked' : ''} 
+                                onclick="toggleSelect('${entry.id}')"
+                                style="display: ${batchMode ? 'block' : 'none'}">
+                            <span class="entry-title">${entry.title}</span>
+                            <span class="entry-trigger ${entry.triggerMode}">
+                                ${entry.triggerMode === 'global' ? '全局' : '关键词' + (entry.matchMode === 'all' ? '(全部)' : '')}
+                            </span>
+                            ${entry.triggerMode === 'keyword' ? `<span class="entry-keywords">${entry.keywords.join(',')}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="entry-content">${entry.content}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="entry-scope-tag">${entry.scope === 'global' ? '全局' : entry.scope === 'local' ? '局部' : '角色'}</span>
+                        <div class="entry-actions" style="${batchMode ? 'display: none;' : ''}">
+                            <button class="entry-action-btn" onclick="editEntry('${entry.id}')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="entry-action-btn" onclick="deleteEntry('${entry.id}')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 批量操作模式
+        function toggleBatchMode() {
+            batchMode = !batchMode;
+            document.getElementById('batchBar').classList.toggle('active', batchMode);
+            document.getElementById('entryList').classList.toggle('batch-mode', batchMode);
+            if (!batchMode) {
+                selectedIds.clear();
+                updateSelectedCount();
+            }
+            renderEntries(document.getElementById('searchInput').value);
+        }
+
+        function toggleSelect(id) {
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+            } else {
+                selectedIds.add(id);
+            }
+            updateSelectedCount();
+            renderEntries(document.getElementById('searchInput').value);
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = `已选 ${selectedIds.size} 项`;
+        }
+
+        function batchToggle(selectAll) {
+            const visibleIds = Array.from(document.querySelectorAll('.entry-item')).map(el => el.dataset.id);
+            if (selectAll) {
+                visibleIds.forEach(id => selectedIds.add(id));
+            } else {
+                visibleIds.forEach(id => selectedIds.delete(id));
+            }
+            updateSelectedCount();
+            renderEntries(document.getElementById('searchInput').value);
+        }
+
+        function batchDelete() {
+            if (selectedIds.size === 0) return;
+            showConfirm(`确定删除选中的 ${selectedIds.size} 个条目？`, function(result) {
+                if (!result) return;
+                entries = entries.filter(e => !selectedIds.has(e.id));
+                saveEntries();
+                selectedIds.clear();
+                updateSelectedCount();
+                renderEntries();
+            });
+        }
+
+        function batchMove() {
+            if (selectedIds.size === 0) return;
+            const target = prompt('移动到：1.全局 2.局部 3.角色\n请输入数字', '2');
+            if (!target) return;
+            const scopeMap = {'1': 'global', '2': 'local', '3': 'character'};
+            if (!scopeMap[target]) return;
+            
+            const targetScope = scopeMap[target];
+            entries.forEach(e => {
+                if (selectedIds.has(e.id)) {
+                    e.scope = targetScope;
+                }
+            });
+            saveEntries();
+            selectedIds.clear();
+            updateSelectedCount();
+            renderEntries();
+        }
+
+        // 弹窗操作
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = '添加条目';
+            document.getElementById('entryTitle').value = '';
+            document.getElementById('entryContent').value = '';
+            document.getElementById('entryKeywords').value = '';
+            selectTrigger('global');
+            selectScope(currentScope);
+            selectMatchMode('any');
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('entryModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('entryModal').classList.remove('active');
+        }
+
+        function selectTrigger(mode) {
+            document.querySelectorAll('[data-trigger]').forEach(el => {
+                el.classList.toggle('active', el.dataset.trigger === mode);
+            });
+            document.getElementById('keywordGroup').style.display = mode === 'keyword' ? 'block' : 'none';
+        }
+
+        function selectScope(scope) {
+            document.querySelectorAll('#entryModal [data-scope]').forEach(el => {
+                el.classList.toggle('active', el.dataset.scope === scope);
+            });
+        }
+
+        function selectMatchMode(mode) {
+            entryMatchMode = mode;
+            document.querySelectorAll('.match-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.match === mode);
+            });
+        }
+
+        function saveEntry() {
+            const title = document.getElementById('entryTitle').value.trim();
+            const content = document.getElementById('entryContent').value.trim();
+            const triggerMode = document.querySelector('[data-trigger].active').dataset.trigger;
+            const scope = document.querySelector('#entryModal [data-scope].active').dataset.scope;
+            const keywords = triggerMode === 'keyword' 
+                ? document.getElementById('entryKeywords').value.split(',').map(k => k.trim()).filter(k => k)
+                : [];
+
+            if (!title || !content) {
+                showAlert('请填写标题和内容');
+                return;
+            }
+
+            if (editingId) {
+                const entry = entries.find(e => e.id === editingId);
+                entry.title = title;
+                entry.content = content;
+                entry.triggerMode = triggerMode;
+                entry.keywords = keywords;
+                entry.scope = scope;
+                entry.matchMode = entryMatchMode;
+            } else {
+                entries.push({
+                    id: Date.now().toString(),
+                    title,
+                    content,
+                    triggerMode,
+                    keywords,
+                    scope,
+                    isEnabled: true,
+                    matchMode: entryMatchMode
+                });
+            }
+
+            saveEntries();
+            closeModal();
+            switchScope(scope);
+        }
+
+        function editEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            editingId = id;
+            document.getElementById('modalTitle').textContent = '编辑条目';
+            document.getElementById('entryTitle').value = entry.title;
+            document.getElementById('entryContent').value = entry.content;
+            document.getElementById('entryKeywords').value = entry.keywords.join(',');
+            selectTrigger(entry.triggerMode);
+            selectScope(entry.scope);
+            selectMatchMode(entry.matchMode || 'any');
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('entryModal').classList.add('active');
+        }
+
+        function deleteEntry(id) {
+            showConfirm('确定删除此条目？', function(result) {
+                if (!result) return;
+                entries = entries.filter(e => e.id !== id);
+                saveEntries();
+                renderEntries();
+            });
+        }
+
+        function saveEntries() {
+            localStorage.setItem('shanhai_entries', JSON.stringify(entries));
+        }
+
+        // 提示词页面功能
+        function toggleModule(header) {
+            const body = header.nextElementSibling;
+            const toggle = header.querySelector('.module-toggle');
+            body.classList.toggle('expanded');
+            toggle.classList.toggle('expanded');
+        }
+
+        function loadPrompts() {
+            const saved = localStorage.getItem('shanhai_prompts');
+            if (saved) {
+                const prompts = JSON.parse(saved);
+                Object.keys(prompts).forEach(key => {
+                    if (document.getElementById(key)) {
+                        document.getElementById(key).value = prompts[key];
+                    }
+                });
+            } else {
+                // 加载默认值
+                Object.keys(defaultPrompts).forEach(key => {
+                    if (document.getElementById(key)) {
+                        document.getElementById(key).value = defaultPrompts[key];
+                    }
+                });
+            }
+        }
+
+        function savePrompts() {
+            const prompts = {};
+            ['module1', 'module2', 'module3', 'module4', 'module5'].forEach(id => {
+                prompts[id] = document.getElementById(id).value;
+            });
+            localStorage.setItem('shanhai_prompts', JSON.stringify(prompts));
+        }
+
+        function resetModule(moduleId) {
+            showConfirm('确定恢复此模块的默认内容？', function(result) {
+                if (!result) return;
+                const textarea = document.getElementById(moduleId);
+                textarea.value = defaultPrompts[moduleId] || '';
+                savePrompts();
+            });
+        }
+
+        // 自动保存提示词
+        ['module1', 'module2', 'module3', 'module4', 'module5'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                clearTimeout(window.saveTimer);
+                window.saveTimer = setTimeout(savePrompts, 500);
+            });
+        });
+
+        // 自定义模块
+        function loadCustomModules() {
+            const container = document.getElementById('customModulesContainer');
+            container.innerHTML = customModules.map((mod, index) => `
+                <div class="module-card" data-custom-id="${mod.id}">
+                    <div class="module-header" onclick="toggleModule(this)">
+                        <input type="text" class="custom-module-header-input" value="${mod.title}" 
+                            onchange="updateCustomTitle('${mod.id}', this.value)" onclick="event.stopPropagation()">
+                        <div class="module-actions">
+                            <button class="reset-btn" onclick="event.stopPropagation();deleteCustomModule('${mod.id}')" title="删除">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                            <svg class="module-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="module-body">
+                        <textarea class="module-textarea" onchange="updateCustomContent('${mod.id}', this.value)">${mod.content}</textarea>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addCustomModule() {
+            const id = 'custom_' + Date.now();
+            customModules.push({id, title: '自定义模块', content: ''});
+            saveCustomModules();
+            loadCustomModules();
+        }
+
+        function updateCustomTitle(id, title) {
+            const mod = customModules.find(m => m.id === id);
+            if (mod) mod.title = title;
+            saveCustomModules();
+        }
+
+        function updateCustomContent(id, content) {
+            const mod = customModules.find(m => m.id === id);
+            if (mod) mod.content = content;
+            saveCustomModules();
+        }
+
+        function deleteCustomModule(id) {
+            showConfirm('确定删除此自定义模块？', function(result) {
+                if (!result) return;
+                customModules = customModules.filter(m => m.id !== id);
+                saveCustomModules();
+                loadCustomModules();
+            });
+        }
+
+        function saveCustomModules() {
+            localStorage.setItem('shanhai_custom_modules', JSON.stringify(customModules));
+        }
+
+        // 设置页面功能
+        function togglePreview() {
+            const wrapper = document.getElementById('previewWrapper');
+            const arrow = document.getElementById('previewArrow');
+            wrapper.classList.toggle('expanded');
+            arrow.classList.toggle('expanded');
+            if (wrapper.classList.contains('expanded')) {
+                updatePreview();
+            }
+        }
+
+        function updatePreview() {
+            let preview = '# 系统规则\n\n';
+
+            // 5个固定模块作为二级标题
+            const modules = [
+                {id: 'module1', title: '基础设定'},
+                {id: 'module2', title: '回复格式'},
+                {id: 'module3', title: '行为准则'},
+                {id: 'module4', title: '系统通知'},
+                {id: 'module5', title: '时间感知'}
+            ];
+
+            modules.forEach(mod => {
+                const content = document.getElementById(mod.id).value;
+                if (content.trim()) {
+                    preview += `## ${mod.title}\n\n${content}\n\n`;
+                }
+            });
+
+            // 自定义模块
+            customModules.forEach(mod => {
+                if (mod.content.trim()) {
+                    preview += `## ${mod.title}\n\n${mod.content}\n\n`;
+                }
+            });
+
+            // 世界书单独作为一级标题
+            const enabledEntries = entries.filter(e => e.isEnabled);
+            if (enabledEntries.length > 0) {
+                preview += `# 世界观\n\n`;
+                enabledEntries.forEach(e => {
+                    preview += `## ${e.title}\n`;
+                    preview += `- **触发**: ${e.triggerMode === 'keyword' ? '关键词' : '全局'}`;
+                    if (e.triggerMode === 'keyword') {
+                        preview += ` (${e.matchMode === 'all' ? '全部匹配' : '任意匹配'}: ${e.keywords.join(', ')})`;
+                    }
+                    preview += `\n`;
+                    preview += `- **范围**: ${e.scope === 'global' ? '全局' : e.scope === 'local' ? '局部' : '角色'}\n`;
+                    preview += `- **内容**: ${e.content}\n\n`;
+                });
+            }
+
+            document.getElementById('previewBox').textContent = preview || '（暂无内容）';
+        }function copyPreview() {
+            const text = document.getElementById('previewBox').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('已复制到剪贴板');
+            });
+        }
+
+        function updateMatchMode(value) {
+            currentMatchMode = value;
+        }
+
+        function testTrigger() {
+            const input = document.getElementById('testInput').value;
+            const resultDiv = document.getElementById('testResult');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<span style="color: #8b7355;">请输入测试消息</span>';
+                return;
+            }
+
+            const triggered = entries.filter(e => {
+                if (!e.isEnabled || e.triggerMode !== 'keyword') return false;
+                const matchMode = e.matchMode || 'any';
+                if (matchMode === 'all') {
+                    return e.keywords.every(k => input.includes(k));
+                } else {
+                    return e.keywords.some(k => input.includes(k));
+                }
+            });
+
+            if (triggered.length === 0) {
+                resultDiv.innerHTML = '<span style="color: #8b7355;">未触发任何关键词条目</span>';
+            } else {
+                resultDiv.innerHTML = triggered.map(e => `
+                    <div style="margin-bottom: 8px; padding: 8px; background: rgba(139, 115, 85, 0.05); border-radius: 6px;">
+                        <div style="font-weight: 600; color: #4a4339;">${e.title}</div>
+                        <div style="font-size: 12px; color: #8b7355; margin-top: 2px;">
+                            匹配模式: ${e.matchMode === 'all' ? '全部匹配' : '任意匹配'} | 
+                            匹配关键词: ${e.keywords.filter(k => input.includes(k)).join(', ')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // 变量管理
+        function loadVariables() {
+            const vars = JSON.parse(localStorage.getItem('shanhai_variables') || '[]');
+            const container = document.getElementById('variablesList');
+            container.innerHTML = vars.map((v, idx) => `
+                <div class="variable-item">
+                    <input type="text" class="var-input" placeholder="变量名" value="${v.key}" onchange="updateVar(${idx}, 'key', this.value)">
+                    <span style="color: #8b7355; flex-shrink: 0; font-size: 13px;">=</span>
+                    <input type="text" class="var-input" placeholder="值" value="${v.value}" onchange="updateVar(${idx}, 'value', this.value)">
+                    <button class="var-delete" onclick="deleteVar(${idx})">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addVariable() {
+            const vars = JSON.parse(localStorage.getItem('shanhai_variables') || '[]');
+            vars.push({key: '', value: ''});
+            localStorage.setItem('shanhai_variables', JSON.stringify(vars));
+            loadVariables();
+        }
+
+        function updateVar(idx, field, value) {
+            const vars = JSON.parse(localStorage.getItem('shanhai_variables') || '[]');
+            vars[idx][field] = value;
+            localStorage.setItem('shanhai_variables', JSON.stringify(vars));
+        }
+
+        function deleteVar(idx) {
+            const vars = JSON.parse(localStorage.getItem('shanhai_variables') || '[]');
+            vars.splice(idx, 1);
+            localStorage.setItem('shanhai_variables', JSON.stringify(vars));
+            loadVariables();
+        }
+
+        // 初始加载变量
+        loadVariables();
+
+        // 数据管理
+        function exportData() {
+            const data = {
+                entries,
+                prompts: {
+                    module1: document.getElementById('module1').value,
+                    module2: document.getElementById('module2').value,
+                    module3: document.getElementById('module3').value,
+                    module4: document.getElementById('module4').value,
+                    module5: document.getElementById('module5').value
+                },
+                customModules,
+                variables: JSON.parse(localStorage.getItem('shanhai_variables') || '[]'),
+                maxEntries: document.getElementById('maxEntriesSlider').value
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `shanhai_config_${new Date().toLocaleDateString()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.entries) {
+                        entries = data.entries;
+                        saveEntries();
+                        renderEntries();
+                    }
+                    if (data.prompts) {
+                        Object.keys(data.prompts).forEach(key => {
+                            if (document.getElementById(key)) {
+                                document.getElementById(key).value = data.prompts[key];
+                            }
+                        });
+                        savePrompts();
+                    }
+                    if (data.customModules) {
+                        customModules = data.customModules;
+                        saveCustomModules();
+                        loadCustomModules();
+                    }
+                    if (data.variables) {
+                        localStorage.setItem('shanhai_variables', JSON.stringify(data.variables));
+                        loadVariables();
+                    }
+                    showAlert('导入成功');
+                } catch (err) {
+                    showAlert('导入失败：文件格式错误');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function resetAll() {
+            showConfirm('确定重置所有数据？此操作不可恢复。', function(result) {
+                if (!result) return;
+                localStorage.removeItem('shanhai_entries');
+                localStorage.removeItem('shanhai_prompts');
+                localStorage.removeItem('shanhai_custom_modules');
+                localStorage.removeItem('shanhai_variables');
+                localStorage.removeItem('shanhai_max_entries');
+                location.reload();
+            });
+        }
+    
+        // 自定义弹窗系统
+        let customConfirmCallback = null;
+
+        function showAlert(message, title = '提示') {
+            document.getElementById('customAlertTitle').textContent = title;
+            document.getElementById('customAlertMessage').textContent = message;
+            document.getElementById('customAlertOverlay').classList.add('active');
+            document.getElementById('customAlertModal').classList.add('active');
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('customAlertOverlay').classList.remove('active');
+            document.getElementById('customAlertModal').classList.remove('active');
+        }
+
+        function showConfirm(message, callback, title = '确认') {
+            customConfirmCallback = callback;
+            document.getElementById('customConfirmTitle').textContent = title;
+            document.getElementById('customConfirmMessage').textContent = message;
+            document.getElementById('customConfirmOverlay').classList.add('active');
+            document.getElementById('customConfirmModal').classList.add('active');
+        }
+
+        function closeCustomConfirm(result) {
+            document.getElementById('customConfirmOverlay').classList.remove('active');
+            document.getElementById('customConfirmModal').classList.remove('active');
+            if (customConfirmCallback) {
+                customConfirmCallback(result);
+                customConfirmCallback = null;
+            }
+        }
+
+    </script>
+
+    <!-- 自定义弹窗系统 -->
+    <div class="custom-modal-overlay" id="customAlertOverlay" onclick="closeCustomAlert()"></div>
+    <div class="custom-modal" id="customAlertModal">
+        <div class="custom-modal-header">
+            <div class="custom-modal-title" id="customAlertTitle">提示</div>
+            <button class="custom-modal-close" onclick="closeCustomAlert()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="custom-modal-body" id="customAlertMessage">消息内容</div>
+        <div class="custom-modal-actions" id="customAlertActions">
+            <button class="custom-modal-btn custom-modal-btn-primary" onclick="closeCustomAlert()">确定</button>
+        </div>
+    </div>
+
+    <!-- 自定义确认弹窗 -->
+    <div class="custom-modal-overlay" id="customConfirmOverlay" onclick="closeCustomConfirm(false)"></div>
+    <div class="custom-modal" id="customConfirmModal">
+        <div class="custom-modal-header">
+            <div class="custom-modal-title" id="customConfirmTitle">确认</div>
+            <button class="custom-modal-close" onclick="closeCustomConfirm(false)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="custom-modal-body" id="customConfirmMessage">确认内容</div>
+        <div class="custom-modal-actions">
+            <button class="custom-modal-btn custom-modal-btn-secondary" onclick="closeCustomConfirm(false)">取消</button>
+            <button class="custom-modal-btn custom-modal-btn-primary" onclick="closeCustomConfirm(true)">确定</button>
+        </div>
+    </div>
+
+</body>
+</html>
