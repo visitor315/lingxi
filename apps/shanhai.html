@@ -1281,6 +1281,24 @@
             opacity: 0.9;
         }
 
+    
+        /* 修复 iOS iframe 内输入自动缩放问题 */
+        @supports (-webkit-touch-callout: none) {
+            input, textarea, select, .form-input, .form-textarea, 
+            .search-input, .module-textarea, .var-input, 
+            .tester-input, .custom-module-header-input {
+                font-size: 16px !important;
+                -webkit-text-size-adjust: 100%;
+                touch-action: manipulation;
+            }
+        }
+
+        /* 额外保障：确保所有输入元素字体大小 */
+        @media screen and (max-device-width: 768px) {
+            input, textarea, select {
+                font-size: 16px !important;
+            }
+        }
     </style>
 <base target="_blank">
 </head>

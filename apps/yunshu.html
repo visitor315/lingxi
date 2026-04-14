@@ -604,6 +604,20 @@
         .empty-state div {
             font-size: 13px;
         }
+    
+        /* 修复 iOS 输入框自动缩放问题 */
+        @media screen and (max-device-width: 768px) {
+            input, textarea, select {
+                font-size: 16px !important;
+                transform: scale(1);
+                -webkit-text-size-adjust: 100%;
+            }
+
+            .form-input, #apiKey, #apiUrl, #model, .custom-select-trigger {
+                font-size: 16px !important;
+                touch-action: manipulation;
+            }
+        }
     </style>
 </head>
 <body>

@@ -422,6 +422,9 @@
             height: 100%;
             border: none;
             background: #f5f1e8;
+            /* 防止 iframe 内内容缩放传导到外层 */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
         }
 
         .app-home-indicator {
