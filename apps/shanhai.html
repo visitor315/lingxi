@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>山海 - 世界书</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -735,6 +735,37 @@
             flex-shrink: 0;
         }
 
+        .var-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            font-family: inherit;
+            font-size: 13px;
+            color: #3a3229;
+            outline: none;
+        }
+
+        .var-input:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .var-delete {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(211, 47, 47, 0.1);
+            border-radius: 6px;
+            color: #c62828;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
         .var-delete:hover {
             background: rgba(211, 47, 47, 0.2);
         }
@@ -1250,14 +1281,82 @@
             opacity: 0.9;
         }
 
-        /* ===== 关键修复：防止输入框聚焦缩放 ===== */
-        input, textarea, select {
+    
+        /* 安卓 WebView 防止输入缩放 */
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
+
+        /* 防止输入时页面缩放 */
+        input, textarea, select, .form-input, .form-textarea {
             font-size: 16px !important;
-            -webkit-text-size-adjust: 100%;
-            touch-action: manipulation;
+            transform: scale(1) !important;
+            transform-origin: left top;
+        }
+
+        /* focus 时防止 zoom */
+        input:focus, textarea:focus {
+            font-size: 16px !important;
         }
     </style>
 <base target="_blank">
+
+    <script>
+        // 安卓 WebView iframe 缩放修复
+        (function() {
+            // 保存原始 viewport
+            var originalViewport = 'width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
+
+            // 输入框聚焦时强制 viewport
+            function lockViewport() {
+                var viewport = document.querySelector('meta[name=viewport]');
+                if (viewport) {
+                    viewport.setAttribute('content', originalViewport);
+                }
+            }
+
+            document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    lockViewport();
+                    // 延迟重置滚动位置，防止页面上移
+                    setTimeout(function() {
+                        if (window.scrollY > 0) {
+                            window.scrollTo(0, 0);
+                        }
+                        // 强制 body 位置
+                        document.body.style.transform = 'none';
+                        document.body.style.height = window.innerHeight + 'px';
+                    }, 50);
+                }
+            });
+
+            document.addEventListener('focusout', function() {
+                // 失去焦点时恢复
+                setTimeout(function() {
+                    document.body.style.height = '100%';
+                }, 100);
+            });
+
+            // 禁用双击缩放
+            var lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e) {
+                var now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+        })();
+    </script>
 </head>
 <body>
     <div class="paper-texture"></div>

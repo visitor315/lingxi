@@ -469,10 +469,15 @@
             height: 60px;
             opacity: 0.3;
         }
-        /* 防止 iOS 输入框聚焦时自动缩放 */
+            /* 防止 iOS 输入框聚焦时自动缩放 */
         input, textarea, select {
             font-size: 16px !important;
             touch-action: manipulation;
+        }
+
+        .form-input, .form-textarea, .search-input, .module-textarea, 
+        .var-input, .custom-module-header-input, .tester-input {
+            font-size: 16px !important;
         }
     </style>
 </head>
@@ -679,7 +684,7 @@
                     </div>
                 </div>
                 <div class="app-frame-container" id="frameContainer">
-                    <iframe class="app-frame" id="appFrame" src=""></iframe>
+                    <iframe class="app-frame" id="appFrame" src="" scrolling="no" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals" style="overflow: hidden;"></iframe>
                 </div>
                 <div class="app-home-indicator" id="appIndicator"></div>
             </div>
@@ -804,6 +809,30 @@
         appIndicator.addEventListener('click', closeApp);
         document.getElementById('appFrame').addEventListener('error', function() {
             this.srcdoc = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:#6b5d4d;font-family:LXGW WenKai Screen;">应用加载失败</div>';
+        });
+
+        // 安卓 iframe 缩放保护
+        var appFrame = document.getElementById('appFrame');
+        appFrame.addEventListener('load', function() {
+            try {
+                var frameDoc = this.contentDocument || this.contentWindow.document;
+                // 强制 iframe 内 viewport
+                var viewport = frameDoc.querySelector('meta[name=viewport]');
+                if (!viewport) {
+                    viewport = frameDoc.createElement('meta');
+                    viewport.name = 'viewport';
+                    frameDoc.head.appendChild(viewport);
+                }
+                viewport.content = 'width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
+
+                // 监听 iframe 内的输入事件
+                frameDoc.addEventListener('focusin', function() {
+                    // 防止父页面缩放
+                    document.body.style.height = window.innerHeight + 'px';
+                });
+            } catch(e) {
+                // 跨域安全限制，忽略
+            }
         });
     </script>
 </body>
