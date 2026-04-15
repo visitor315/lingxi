@@ -422,9 +422,6 @@
             height: 100%;
             border: none;
             background: #f5f1e8;
-            /* 防止 iframe 内内容缩放传导到外层 */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
         }
 
         .app-home-indicator {
@@ -472,15 +469,10 @@
             height: 60px;
             opacity: 0.3;
         }
-            /* 防止 iOS 输入框聚焦时自动缩放 */
+        /* 防止 iOS 输入框聚焦时自动缩放 */
         input, textarea, select {
             font-size: 16px !important;
             touch-action: manipulation;
-        }
-
-        .form-input, .form-textarea, .search-input, .module-textarea, 
-        .var-input, .custom-module-header-input, .tester-input {
-            font-size: 16px !important;
         }
     </style>
 </head>

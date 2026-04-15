@@ -735,37 +735,6 @@
             flex-shrink: 0;
         }
 
-        .var-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid rgba(139, 115, 85, 0.2);
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.6);
-            font-family: inherit;
-            font-size: 13px;
-            color: #3a3229;
-            outline: none;
-        }
-
-        .var-input:focus {
-            border-color: rgba(139, 115, 85, 0.4);
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        .var-delete {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: rgba(211, 47, 47, 0.1);
-            border-radius: 6px;
-            color: #c62828;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
         .var-delete:hover {
             background: rgba(211, 47, 47, 0.2);
         }
@@ -1281,23 +1250,11 @@
             opacity: 0.9;
         }
 
-    
-        /* 修复 iOS iframe 内输入自动缩放问题 */
-        @supports (-webkit-touch-callout: none) {
-            input, textarea, select, .form-input, .form-textarea, 
-            .search-input, .module-textarea, .var-input, 
-            .tester-input, .custom-module-header-input {
-                font-size: 16px !important;
-                -webkit-text-size-adjust: 100%;
-                touch-action: manipulation;
-            }
-        }
-
-        /* 额外保障：确保所有输入元素字体大小 */
-        @media screen and (max-device-width: 768px) {
-            input, textarea, select {
-                font-size: 16px !important;
-            }
+        /* ===== 关键修复：防止输入框聚焦缩放 ===== */
+        input, textarea, select {
+            font-size: 16px !important;
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
         }
     </style>
 <base target="_blank">
