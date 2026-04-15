@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
+    <meta name="full-screen" content="yes">
     <title>灵犀</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -302,7 +305,6 @@
         .app-luopan { background: linear-gradient(135deg, rgba(174, 213, 129, 0.85) 0%, rgba(124, 179, 66, 0.9) 100%); }
         .app-xiping { background: linear-gradient(135deg, rgba(120, 120, 120, 0.9) 0%, rgba(70, 70, 70, 0.95) 100%); }
         
-        /* 新增应用配色 */
         .app-shanhai { 
             background: linear-gradient(135deg, rgba(160, 110, 80, 0.85) 0%, rgba(120, 80, 60, 0.9) 100%); 
         }
@@ -469,15 +471,11 @@
             height: 60px;
             opacity: 0.3;
         }
-            /* 防止 iOS 输入框聚焦时自动缩放 */
+        /* 防止输入框聚焦缩放 */
         input, textarea, select {
             font-size: 16px !important;
             touch-action: manipulation;
-        }
-
-        .form-input, .form-textarea, .search-input, .module-textarea, 
-        .var-input, .custom-module-header-input, .tester-input {
-            font-size: 16px !important;
+            -webkit-text-size-adjust: 100%;
         }
     </style>
 </head>
@@ -511,7 +509,7 @@
                     <div class="date-text" id="date-text">4月14日 星期二</div>
                 </div>
 
-                <!-- 主应用网格：扩展为 4×3 布局，容纳 10 个应用 -->
+                <!-- 主应用网格 -->
                 <div class="app-grid">
                     <!-- 第一行 -->
                     <div class="app-item" onclick="openApp('云信')">
@@ -585,7 +583,7 @@
                         <div class="app-name">云枢</div>
                     </div>
                     
-                    <!-- 第三行（新增） -->
+                    <!-- 第三行 -->
                     <div class="app-item" onclick="openApp('山海')">
                         <div class="app-icon app-shanhai">
                             <svg viewBox="0 0 24 24" fill="white">
@@ -608,7 +606,6 @@
                         </div>
                         <div class="app-name">司南</div>
                     </div>
-                    <!-- 占位保持网格对齐（可选） -->
                     <div class="app-item" style="visibility: hidden;">
                         <div class="app-icon"></div>
                         <div class="app-name"></div>
@@ -619,7 +616,7 @@
                     </div>
                 </div>
 
-                <!-- Dock栏：司南替换云枢 -->
+                <!-- Dock栏 -->
                 <div class="dock">
                     <div class="app-item" onclick="openApp('云信')">
                         <div class="app-icon app-yunxin">
@@ -664,7 +661,7 @@
 
             <div class="home-indicator"></div>
 
-            <!-- 应用容器（已预留山海与司南的 frame 路径） -->
+            <!-- 应用容器 -->
             <div class="app-container" id="appContainer">
                 <div class="app-status-bar">
                     <div class="time" id="appClock">23:16</div>
@@ -699,7 +696,7 @@
     </div>
 
     <script>
-        // 新增山海与司南的应用路径预留
+        // 应用路径
         const appUrls = {
             '云信': 'apps/yunxin.html',
             '云枢': 'apps/yunshu.html',
@@ -709,8 +706,8 @@
             '日晷': 'apps/rigui.html',
             '笔墨': 'apps/bimo.html',
             '罗盘': 'apps/luopan.html',
-            '山海': 'apps/shanhai.html',   // 世界书应用预留
-            '司南': 'apps/sinan.html',     // 设置应用预留
+            '山海': 'apps/shanhai.html',
+            '司南': 'apps/sinan.html',
             '息屏': null
         };
 
@@ -807,7 +804,7 @@
         }
 
         appIndicator.addEventListener('click', closeApp);
-        document.getElementById('appFrame').addEventListener('error', function() {
+        document.getElementById('appFrame')addEventListener('error',function{
             this.srcdoc = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:#6b5d4d;font-family:LXGW WenKai Screen;">应用加载失败</div>';
         });
     </script>
