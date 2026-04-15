@@ -3,11 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 夸克/X5 内核专用 -->
-    <meta name="x5-fullscreen" content="true">
-    <meta name="x5-page-mode" content="app">
-    <meta name="browsermode" content="application">
-    <meta name="wap-font-scale" content="no">
     <title>山海 - 世界书</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -1286,6 +1281,30 @@
             opacity: 0.9;
         }
 
+            /* 夸克终极防压缩 */
+        * {
+            -webkit-text-size-adjust: none !important;
+            text-size-adjust: none !important;
+        }
+
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            /* 创建独立布局上下文 */
+            contain: layout style;
+        }
+
+        /* 输入框聚焦时防止父元素压缩 */
+        input:focus, textarea:focus {
+            position: relative;
+            z-index: 9999;
+        }
     </style>
 <base target="_blank">
 </head>
