@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 夸克/X5 内核专用 -->
+    <meta name="x5-fullscreen" content="true">
+    <meta name="x5-page-mode" content="app">
+    <meta name="browsermode" content="application">
+    <meta name="wap-font-scale" content="no">
     <title>山海 - 世界书</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -1297,7 +1302,7 @@
     </div>
 
     <!-- 内容区 -->
-    <div class="page-wrapper" id="pageWrapper"><div class="container">
+    <div class="container">
         <!-- 世界书标签 -->
         <div class="tab-content active" id="tab-worldbook">
             <!-- 批量操作栏 -->
@@ -2362,63 +2367,5 @@
         </div>
     </div>
 
-</div>
-    <script>
-        // 安卓键盘弹出 visualViewport 反向补偿
-        (function() {
-            if (!window.visualViewport) {
-                // 不支持 visualViewport 的备用方案
-                window.addEventListener('resize', function() {
-                    setTimeout(function() {
-                        window.scrollTo(0, 0);
-                    }, 100);
-                });
-                return;
-            }
-
-            const vv = window.visualViewport;
-            const wrapper = document.getElementById('pageWrapper') || document.body;
-            let initialHeight = vv.height;
-            let initialWidth = vv.width;
-
-            function adjustScale() {
-                // 计算当前视觉视口与初始视口的比例
-                const heightScale = vv.height / initialHeight;
-                const widthScale = vv.width / initialWidth;
-
-                if (heightScale < 0.95) {
-                    // 键盘弹出，视觉视口变小了
-                    // 反向放大 wrapper，让内容看起来没有被压缩
-                    const scale = 1 / heightScale;
-                    wrapper.style.transform = 'scale(' + scale + ')';
-                    wrapper.style.width = (100 / scale) + '%';
-                } else {
-                    // 键盘收起或正常状态
-                    wrapper.style.transform = 'scale(1)';
-                    wrapper.style.width = '100%';
-                    // 更新基准值（处理屏幕旋转等）
-                    if (heightScale > 0.98) {
-                        initialHeight = vv.height;
-                        initialWidth = vv.width;
-                    }
-                }
-            }
-
-            vv.addEventListener('resize', adjustScale);
-            window.addEventListener('scroll', function() {
-                // 防止页面被键盘顶起滚动
-                if (window.scrollY > 0) {
-                    window.scrollTo(0, 0);
-                }
-            });
-
-            // 初始化
-            setTimeout(function() {
-                initialHeight = vv.height;
-                initialWidth = vv.width;
-            }, 100);
-        })();
-    </script>
-</body>
 </body>
 </html>
