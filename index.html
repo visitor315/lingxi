@@ -27,10 +27,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 固定高度，防止键盘弹出时 body 被压缩 */
-            height: 100dvh;
-            min-height: 100dvh;
-            max-height: 100dvh;
+            min-height: 100vh;
             overflow: hidden;
             margin: 0;
             padding: 0;
@@ -418,20 +415,13 @@
             flex: 1;
             position: relative;
             overflow: hidden;
-            /* 使用固定视口高度，不受键盘影响 */
-            height: 100dvh;
-            max-height: 100dvh;
         }
 
         .app-frame {
             width: 100%;
-            height: 100dvh;
+            height: 100%;
             border: none;
             background: #f5f1e8;
-            /* 防止键盘弹出时压缩 */
-            position: absolute;
-            top: 0;
-            left: 0;
         }
 
         .app-home-indicator {
@@ -782,35 +772,6 @@
         function wakeScreen() {
             document.getElementById('screenOff').classList.remove('active');
         }
-
-        // 锁定视口高度，防止键盘弹出压缩页面
-        (function() {
-            var initialHeight = window.innerHeight;
-            var frame = document.getElementById('appFrame');
-            var container = document.getElementById('frameContainer');
-
-            window.addEventListener('resize', function() {
-                // 如果高度变小（键盘弹出），强制恢复原始高度
-                if (window.innerHeight < initialHeight) {
-                    document.body.style.height = initialHeight + 'px';
-                    if (container) {
-                        container.style.height = (initialHeight - 44 - 8) + 'px'; // 减去状态栏和指示器
-                    }
-                    // 禁止缩放和滚动调整
-                    window.scrollTo(0, 0);
-                }
-            });
-
-            // 防止 focus 时的默认行为
-            document.addEventListener('focusin', function(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    setTimeout(function() {
-                        window.scrollTo(0, 0);
-                        document.body.scrollTop = 0;
-                    }, 10);
-                }
-            });
-        })();
 
         let touchStartY = 0, touchEndY = 0;
         const gestureThreshold = 60;

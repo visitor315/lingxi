@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>云枢</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -17,16 +17,8 @@
             font-family: "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", serif;
             background: linear-gradient(180deg, #f7f3eb 0%, #ede7dc 100%);
             color: #3a3229;
-            /* 固定视口高度，不受键盘影响 */
-            height: 100dvh;
-            min-height: 100dvh;
-            max-height: 100dvh;
+            min-height: 100vh;
             overflow-x: hidden;
-            overflow-y: auto;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
         }
 
         .paper-texture {
@@ -613,39 +605,6 @@
             font-size: 13px;
         }
     </style>
-
-    <script>
-        // 防止安卓键盘弹出压缩页面
-        (function() {
-            var initialHeight = window.innerHeight;
-            var body = document.body;
-
-            window.addEventListener('resize', function() {
-                // 键盘弹出时高度减小，强制恢复原高度
-                if (window.innerHeight < initialHeight) {
-                    body.style.height = initialHeight + 'px';
-                    body.style.overflow = 'hidden';
-                    // 保持内容可见但禁止压缩
-                    setTimeout(function() {
-                        window.scrollTo(0, 0);
-                    }, 0);
-                } else {
-                    body.style.height = '100dvh';
-                    body.style.overflow = 'auto';
-                }
-            });
-
-            // Focus 时阻止默认滚动
-            document.addEventListener('focusin', function(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                    setTimeout(function() {
-                        window.scrollTo(0, 0);
-                    }, 50);
-                }
-            });
-        })();
-    </script>
-</head>
 </head>
 <body>
     <div class="paper-texture"></div>
@@ -742,7 +701,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="page-wrapper" id="pageWrapper"><div class="container">
         <!-- 删除顶部标题，直接显示配置卡片 -->
 
         <div class="config-card">
@@ -1193,5 +1152,63 @@
 
         renderConfigs();
     </script>
+</div>
+    <script>
+        // 安卓键盘弹出 visualViewport 反向补偿
+        (function() {
+            if (!window.visualViewport) {
+                // 不支持 visualViewport 的备用方案
+                window.addEventListener('resize', function() {
+                    setTimeout(function() {
+                        window.scrollTo(0, 0);
+                    }, 100);
+                });
+                return;
+            }
+
+            const vv = window.visualViewport;
+            const wrapper = document.getElementById('pageWrapper') || document.body;
+            let initialHeight = vv.height;
+            let initialWidth = vv.width;
+
+            function adjustScale() {
+                // 计算当前视觉视口与初始视口的比例
+                const heightScale = vv.height / initialHeight;
+                const widthScale = vv.width / initialWidth;
+
+                if (heightScale < 0.95) {
+                    // 键盘弹出，视觉视口变小了
+                    // 反向放大 wrapper，让内容看起来没有被压缩
+                    const scale = 1 / heightScale;
+                    wrapper.style.transform = 'scale(' + scale + ')';
+                    wrapper.style.width = (100 / scale) + '%';
+                } else {
+                    // 键盘收起或正常状态
+                    wrapper.style.transform = 'scale(1)';
+                    wrapper.style.width = '100%';
+                    // 更新基准值（处理屏幕旋转等）
+                    if (heightScale > 0.98) {
+                        initialHeight = vv.height;
+                        initialWidth = vv.width;
+                    }
+                }
+            }
+
+            vv.addEventListener('resize', adjustScale);
+            window.addEventListener('scroll', function() {
+                // 防止页面被键盘顶起滚动
+                if (window.scrollY > 0) {
+                    window.scrollTo(0, 0);
+                }
+            });
+
+            // 初始化
+            setTimeout(function() {
+                initialHeight = vv.height;
+                initialWidth = vv.width;
+            }, 100);
+        })();
+    </script>
+</body>
 </body>
 </html>
