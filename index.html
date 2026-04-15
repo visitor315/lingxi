@@ -27,7 +27,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            /* 固定高度，防止键盘弹出时 body 被压缩 */
+            height: 100dvh;
+            min-height: 100dvh;
+            max-height: 100dvh;
             overflow: hidden;
             margin: 0;
             padding: 0;
@@ -415,13 +418,20 @@
             flex: 1;
             position: relative;
             overflow: hidden;
+            /* 使用固定视口高度，不受键盘影响 */
+            height: 100dvh;
+            max-height: 100dvh;
         }
 
         .app-frame {
             width: 100%;
-            height: 100%;
+            height: 100dvh;
             border: none;
             background: #f5f1e8;
+            /* 防止键盘弹出时压缩 */
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .app-home-indicator {
@@ -684,7 +694,7 @@
                     </div>
                 </div>
                 <div class="app-frame-container" id="frameContainer">
-                    <iframe class="app-frame" id="appFrame" src="" scrolling="no" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals" style="overflow: hidden;"></iframe>
+                    <iframe class="app-frame" id="appFrame" src=""></iframe>
                 </div>
                 <div class="app-home-indicator" id="appIndicator"></div>
             </div>
@@ -773,6 +783,35 @@
             document.getElementById('screenOff').classList.remove('active');
         }
 
+        // 锁定视口高度，防止键盘弹出压缩页面
+        (function() {
+            var initialHeight = window.innerHeight;
+            var frame = document.getElementById('appFrame');
+            var container = document.getElementById('frameContainer');
+
+            window.addEventListener('resize', function() {
+                // 如果高度变小（键盘弹出），强制恢复原始高度
+                if (window.innerHeight < initialHeight) {
+                    document.body.style.height = initialHeight + 'px';
+                    if (container) {
+                        container.style.height = (initialHeight - 44 - 8) + 'px'; // 减去状态栏和指示器
+                    }
+                    // 禁止缩放和滚动调整
+                    window.scrollTo(0, 0);
+                }
+            });
+
+            // 防止 focus 时的默认行为
+            document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    setTimeout(function() {
+                        window.scrollTo(0, 0);
+                        document.body.scrollTop = 0;
+                    }, 10);
+                }
+            });
+        })();
+
         let touchStartY = 0, touchEndY = 0;
         const gestureThreshold = 60;
         const appContainer = document.getElementById('appContainer');
@@ -809,30 +848,6 @@
         appIndicator.addEventListener('click', closeApp);
         document.getElementById('appFrame').addEventListener('error', function() {
             this.srcdoc = '<div style="display:flex;justify-content:center;align-items:center;height:100%;color:#6b5d4d;font-family:LXGW WenKai Screen;">应用加载失败</div>';
-        });
-
-        // 安卓 iframe 缩放保护
-        var appFrame = document.getElementById('appFrame');
-        appFrame.addEventListener('load', function() {
-            try {
-                var frameDoc = this.contentDocument || this.contentWindow.document;
-                // 强制 iframe 内 viewport
-                var viewport = frameDoc.querySelector('meta[name=viewport]');
-                if (!viewport) {
-                    viewport = frameDoc.createElement('meta');
-                    viewport.name = 'viewport';
-                    frameDoc.head.appendChild(viewport);
-                }
-                viewport.content = 'width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
-
-                // 监听 iframe 内的输入事件
-                frameDoc.addEventListener('focusin', function() {
-                    // 防止父页面缩放
-                    document.body.style.height = window.innerHeight + 'px';
-                });
-            } catch(e) {
-                // 跨域安全限制，忽略
-            }
         });
     </script>
 </body>

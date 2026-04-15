@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>云枢</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -17,8 +17,16 @@
             font-family: "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", serif;
             background: linear-gradient(180deg, #f7f3eb 0%, #ede7dc 100%);
             color: #3a3229;
-            min-height: 100vh;
+            /* 固定视口高度，不受键盘影响 */
+            height: 100dvh;
+            min-height: 100dvh;
+            max-height: 100dvh;
             overflow-x: hidden;
+            overflow-y: auto;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
         }
 
         .paper-texture {
@@ -604,60 +612,40 @@
         .empty-state div {
             font-size: 13px;
         }
-    
-        /* 安卓 WebView iframe 内防止输入缩放 */
-        html, body {
-            height: 100%;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        input, textarea, select {
-            font-size: 16px;
-            /* 防止安卓 WebView 自动缩放 */
-            transform-origin: left top;
-        }
-
-        /* 强制保持页面比例 */
-        @media screen and (max-device-width: 768px) {
-            body {
-                touch-action: pan-y;
-            }
-
-            input:focus, textarea:focus {
-                font-size: 16px !important;
-                /* 防止 focus 时的 zoom */
-                transform: scale(1) !important;
-            }
-        }
     </style>
 
     <script>
-        // 安卓 WebView 防止输入缩放
-        document.addEventListener('focusin', function(e) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                // 强制视口保持不变
-                var viewport = document.querySelector('meta[name=viewport]');
-                if (viewport) {
-                    viewport.setAttribute('content', 'width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
-                }
-                // 延迟检查缩放
-                setTimeout(function() {
-                    window.scrollTo(0, 0);
-                }, 100);
-            }
-        });
+        // 防止安卓键盘弹出压缩页面
+        (function() {
+            var initialHeight = window.innerHeight;
+            var body = document.body;
 
-        // 防止双击缩放
-        var lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
-            var now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
+            window.addEventListener('resize', function() {
+                // 键盘弹出时高度减小，强制恢复原高度
+                if (window.innerHeight < initialHeight) {
+                    body.style.height = initialHeight + 'px';
+                    body.style.overflow = 'hidden';
+                    // 保持内容可见但禁止压缩
+                    setTimeout(function() {
+                        window.scrollTo(0, 0);
+                    }, 0);
+                } else {
+                    body.style.height = '100dvh';
+                    body.style.overflow = 'auto';
+                }
+            });
+
+            // Focus 时阻止默认滚动
+            document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    setTimeout(function() {
+                        window.scrollTo(0, 0);
+                    }, 50);
+                }
+            });
+        })();
     </script>
+</head>
 </head>
 <body>
     <div class="paper-texture"></div>
