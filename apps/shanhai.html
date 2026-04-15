@@ -2,7 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
     <title>山海 - 世界书</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -735,37 +737,6 @@
             flex-shrink: 0;
         }
 
-        .var-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid rgba(139, 115, 85, 0.2);
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.6);
-            font-family: inherit;
-            font-size: 13px;
-            color: #3a3229;
-            outline: none;
-        }
-
-        .var-input:focus {
-            border-color: rgba(139, 115, 85, 0.4);
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        .var-delete {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: rgba(211, 47, 47, 0.1);
-            border-radius: 6px;
-            color: #c62828;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
         .var-delete:hover {
             background: rgba(211, 47, 47, 0.2);
         }
@@ -1281,29 +1252,11 @@
             opacity: 0.9;
         }
 
-            /* 夸克终极防压缩 */
-        * {
-            -webkit-text-size-adjust: none !important;
-            text-size-adjust: none !important;
-        }
-
-        html {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
-            /* 创建独立布局上下文 */
-            contain: layout style;
-        }
-
-        /* 输入框聚焦时防止父元素压缩 */
-        input:focus, textarea:focus {
-            position: relative;
-            z-index: 9999;
+        /* 防止输入框聚焦缩放 */
+        input, textarea, select {
+            font-size: 16px !important;
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
         }
     </style>
 <base target="_blank">
@@ -2347,6 +2300,40 @@
             }
         }
 
+        // 强制防止安卓夸克缩放
+        (function() {
+            let viewport = document.querySelector('meta[name="viewport"]');
+            if (!viewport) {
+                viewport = document.createElement('meta');
+                viewport.name = 'viewport';
+                document.head.appendChild(viewport);
+            }
+            const defaultContent = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+            viewport.setAttribute('content', defaultContent);
+
+            function resetViewport() {
+                viewport.setAttribute('content', defaultContent);
+            }
+
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('focus', resetViewport);
+                input.addEventListener('click', resetViewport);
+                input.addEventListener('touchstart', resetViewport);
+            });
+
+            const observer = new MutationObserver(() => {
+                document.querySelectorAll('input, textarea, select').forEach(input => {
+                    if (!input._hasZoomFix) {
+                        input._hasZoomFix = true;
+                        input.addEventListener('focus', resetViewport);
+                        input.addEventListener('click', resetViewport);
+                        input.addEventListener('touchstart', resetViewport);
+                    }
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        })();
     </script>
 
     <!-- 自定义弹窗系统 -->
