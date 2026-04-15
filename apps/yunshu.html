@@ -2,7 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
     <title>云枢</title>
     <link rel="stylesheet" href="https://registry.npmmirror.com/lxgw-wenkai-screen-web/latest/files/style.css">
     <style>
@@ -604,29 +606,12 @@
         .empty-state div {
             font-size: 13px;
         }
-            /* 夸克终极防压缩 */
-        * {
-            -webkit-text-size-adjust: none !important;
-            text-size-adjust: none !important;
-        }
 
-        html {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
-            /* 创建独立布局上下文 */
-            contain: layout style;
-        }
-
-        /* 输入框聚焦时防止父元素压缩 */
-        input:focus, textarea:focus {
-            position: relative;
-            z-index: 9999;
+        /* 防止输入框聚焦缩放 */
+        input, textarea, select {
+            font-size: 16px !important;
+            -webkit-text-size-adjust: 100%;
+            touch-action: manipulation;
         }
     </style>
 </head>
@@ -726,8 +711,6 @@
     </div>
 
     <div class="container">
-        <!-- 删除顶部标题，直接显示配置卡片 -->
-
         <div class="config-card">
             <div class="card-title">API 配置</div>
             
@@ -1175,6 +1158,41 @@
         }
 
         renderConfigs();
+
+        // 强制防止安卓夸克缩放
+        函数
+            let viewport = document.querySelector('meta[name="viewport"]');
+            if (!viewport) {
+                viewport = document.createElement('meta');
+                viewport.name = 'viewport';
+                document.head.appendChild(viewport);
+            }
+            const defaultContent = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+            viewport.setAttribute('content', defaultContent);
+
+            function resetViewport() {
+                viewport.setAttribute('content', defaultContent);
+            }
+
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('focus', resetViewport);
+                input.addEventListener('click', resetViewport);
+                input.addEventListener('touchstart', resetViewport);
+            });
+
+            const observer = new MutationObserver(() => {
+                document.querySelectorAll('input, textarea, select').forEach(input => {
+                    if (!input._hasZoomFix) {
+                        input._hasZoomFix = true;
+                        input.addEventListener('focus', resetViewport);
+                        input.addEventListener('click', resetViewport);
+                        input.addEventListener('touchstart', resetViewport);
+                    }
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        })();
     </script>
 </body>
 </html>
